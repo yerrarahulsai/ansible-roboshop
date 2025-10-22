@@ -23,15 +23,15 @@
     register: ec2_output
 
   # For testing purpose, to know the format
-  - name: Print the ec2_output
-    ansible.buitlin.debug:
+  - name: print the ec2_output
+    ansible.builtin.debug:
       msg: "{{ ec2_output }}"
   
-  - name: Print public and private IP
-    ansible.builtin.debug:
-      msg: "{{ item.instances[0].private_ip_address }}"
-      msg: "{{ item.instances[0].public_ip_address }}"
-    loop: "{{ ec2_output .results }}"
+  # - name: print public and private IP
+  #   ansible.builtin.debug:
+  #     msg: "{{ item.instances[0].private_ip_address }}"
+  #     msg: "{{ item.instances[0].public_ip_address }}"
+  #   loop: "{{ ec2_output .results }}"
     
   # - name: create route53 records
   #   amazon.aws.route53:
