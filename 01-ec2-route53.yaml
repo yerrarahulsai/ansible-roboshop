@@ -1,0 +1,64 @@
+- name: Create ec2 instance and route53 records
+  hosts: local
+  connection: local
+  vars:
+    ami_id: ami-09c813fb71547fc4f
+    sg_id: sg-0a3dd7eb7d2bf30de
+    zone_id: Z003954831PEG5Y08MJB9
+    domain_name: "rahulsai.com"
+    instances: 
+    - mongodb
+    - redis
+  tasks:
+  - name: create ec2 instance 
+    amazon.aws.ec2_instance:     # This is module
+      name: "{{ item }}"
+      instance_type: t3.micro
+      security_group: "{{ sg_id }}"
+      image_id: "{{ ami_id }}"
+      tags:
+        Name: "{{ item }}"
+    loop: "{{ instances }}"
+
+    register: ec2_output
+
+  # For testing purpose, to know the format
+  - name: Print the ec2_output
+    ansible.buitlin.debug:
+      msg: "{{ ec2_output }}"
+  
+  - name: Print public and private IP
+    ansible.builtin.debug:
+      msg: "{{ item.instances[0].private_ip_address }}"
+      msg: "{{ item.instances[0].public_ip_address }}"
+    loop: "{{ ec2_output .results }}"
+    
+  # - name: create route53 records
+  #   amazon.aws.route53:
+  #     state: present
+  #     zone: "{{ domain_name }}"
+  #     record: "{{ item.item }}.{{ domain_name}}"  #item - iteration another item in the output name will be there
+  #     type: A
+  #     ttl: 1
+  #     value: "{{ item.instance[0].private_ip_address }}"
+  #     overwrite: true  # To overwrite existing ip value
+  #   loop: "{{ ec2_output.results }}"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# In the master node - we should type aws configure and login
