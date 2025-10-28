@@ -43,16 +43,19 @@
       value: "{{ item.instance[0].private_ip_address }}"
       overwrite: true  # To overwrite existing ip value
     loop: "{{ ec2_output.results }}"
-
-
-
-
-
-
-
-
-
-
+  
+  # We are creating one record with public only for frontend
+  - name: create route53 records
+    amazon.aws.route53:
+      state: present
+      zone: "{{ domain_name }}"
+      record: "{{ item.item }}.{{ domain_name}}"  
+      type: A
+      ttl: 1
+      value: "{{ item.instance[0].public_ip_address }}"
+      overwrite: true  
+    when: item.item == "frontend"
+    loop: "{{ ec2_output.results }}"
 
 
 
