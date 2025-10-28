@@ -7,12 +7,12 @@
     ansible.builtin.command: dnf module disable redis -y
 
   - name: enabling redis
-    ansible.builtin.command: dnf enable redis:7 -y
+    ansible.builtin.command: dnf module enable redis:7 -y
   
   - name: install redis server
     ansible.builtin.package:
-    name: redis
-    state: present
+      name: redis
+      state: present
   
   - name: allow remote connections
     ansible.builtin.replace:
