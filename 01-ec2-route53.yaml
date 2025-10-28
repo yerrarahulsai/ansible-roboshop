@@ -40,7 +40,7 @@
       record: "{{ item.item }}.{{ domain_name}}"  #item - iteration another item is the key name which will have the instance name
       type: A
       ttl: 1
-      value: "{{ item.instance[0].private_ip_address }}"
+      value: "{{ item.instances[0].private_ip_address }}"
       overwrite: true  # To overwrite existing ip value
     loop: "{{ ec2_output.results }}"
   
