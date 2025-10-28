@@ -6,9 +6,10 @@
     sg_id: sg-0a3dd7eb7d2bf30de
     zone_id: Z003954831PEG5Y08MJB9
     domain_name: "rahulsai.com"
-    instances: 
-    - mongodb
-    - redis
+    # Passing the instances through command line using -e
+    # instances: 
+    # - mongodb
+    # - redis
   tasks:
   - name: create ec2 instance 
     amazon.aws.ec2_instance:     # This is module
@@ -19,30 +20,29 @@
       tags:
         Name: "{{ item }}"
     loop: "{{ instances }}"
-
     register: ec2_output
 
   # For testing purpose, to know the format
-  - name: print the ec2_output
-    ansible.builtin.debug:
-      msg: "{{ ec2_output }}"
+  # - name: print the ec2_output
+  #   ansible.builtin.debug:
+  #     msg: "{{ ec2_output }}"
   
   # - name: print public and private IP
   #   ansible.builtin.debug:
   #     msg: "{{ item.instances[0].private_ip_address }}"
   #     msg: "{{ item.instances[0].public_ip_address }}"
-  #   loop: "{{ ec2_output .results }}"
-    
-  # - name: create route53 records
-  #   amazon.aws.route53:
-  #     state: present
-  #     zone: "{{ domain_name }}"
-  #     record: "{{ item.item }}.{{ domain_name}}"  #item - iteration another item in the output name will be there
-  #     type: A
-  #     ttl: 1
-  #     value: "{{ item.instance[0].private_ip_address }}"
-  #     overwrite: true  # To overwrite existing ip value
   #   loop: "{{ ec2_output.results }}"
+    
+  - name: create route53 records
+    amazon.aws.route53:
+      state: present
+      zone: "{{ domain_name }}"
+      record: "{{ item.item }}.{{ domain_name}}"  #item - iteration another item is the key name which will have the instance name
+      type: A
+      ttl: 1
+      value: "{{ item.instance[0].private_ip_address }}"
+      overwrite: true  # To overwrite existing ip value
+    loop: "{{ ec2_output.results }}"
 
 
 
@@ -58,7 +58,6 @@
 
 
 
-
-
-
+# We will pass instances through command line
+# ansible-playbook -i inventory.ini 01-ec2-route53.yaml -e "instances=['catalogue','user']"
 # In the master node - we should type aws configure and login
