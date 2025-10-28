@@ -1,0 +1,72 @@
+- name: setup catalogue server
+  hosts: catalogue
+  become: yes
+
+  tasks:
+  - name: disable default nodejs
+    ansible.builtin.command: dnf module disable nodejs -y
+
+  - name: enable nodejs 20
+    ansible.builtin.command: dnf module enable nodejs:20 -y
+  
+  - name: install nodejs
+    ansible.builtin.package:
+      name: nodejs
+      state: present
+  
+  - name: create roboshop system user
+    name: roboshop
+    comment: Roboshop system user
+    system: true   # Setting this as true makes the user system account
+    shell: /sbin/nologin
+    home: /app
+  
+  - name: create app directory
+    ansible.builtin.file:
+      state: directory
+      path: /app
+  
+  - name: download catalogue application
+    ansible.builtin.get_url:
+      url: https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip
+      dest: /tmp/catalogue.zip
+  
+  - name: extract catalogue application
+    ansible.builtin.unarchive:
+      src: /tmp/catalogue.zip
+      dest: /app
+      remote_src: yes   #Unarchive a file that is already on the remote machine
+  
+  - name: install dependencies
+    community.general.npm:
+      path: /app
+  
+  - name: copy catalogue service
+    ansible.builtin.copy:
+      src: catalogue.service
+      dest: /etc/systemd/system/catalogue.service
+  
+  - name: copy mongo repo
+    ansible.builtin.copy:
+      src: mongo.repo
+      dest: /etc/yum.repos.d/mongo.repo
+    
+  - name: install mongodb client
+    ansible.builtin.package:
+      name: mongodb-mongosh
+      state: present
+  
+  - name: connect to mongodb catalogue
+    ansible.builtin.command: mongosh mongodb.rahulsai.com --quiet --eval "db.getMongo().getDBNames().indexOf('catalogue')"
+    register: catalogue_output
+
+  - name: load products into mongodb
+    ansible.builtin.shell: mongosh --host mongodb.rahulsai.com </app/db/master-data.js
+    when: catalogue_output.stdout | int < 0   #stdout is string in the output
+  
+  - name: daemon reload, enable and start
+    ansible.builtin.systemd_service:
+      name: catalogue
+      enabled: true
+      state: started
+      daemon_reload: true
