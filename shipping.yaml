@@ -69,7 +69,7 @@
       dest: /etc/systemd/system/shipping.service
   
   - name: import shipping data into mysql
-    community.msql.mysql_db:
+    community.mysql.mysql_db:
       state: import
       name: all
       login_host: mysql.rahulsai.com
