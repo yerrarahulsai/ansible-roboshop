@@ -52,7 +52,7 @@
       record: "{{ item.item }}.{{ domain_name}}"  
       type: A
       ttl: 1
-      value: "{{ item.instance[0].public_ip_address }}"
+      value: "{{ item.instances[0].public_ip_address }}"
       overwrite: true  
     when: item.item == "frontend"
     loop: "{{ ec2_output.results }}"
