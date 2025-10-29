@@ -7,9 +7,9 @@
     ansible.builtin.package:
       name: "{{ item }}"
       state: present
-      loop:
-      - maven
-      - mysql
+    loop:
+    - maven
+    - mysql
   
   # Installing MySQL python libraries for connecting to SQL through ansible, cryptography package is required for the password
   - name: install mysql python libraries
